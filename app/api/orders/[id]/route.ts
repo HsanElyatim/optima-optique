@@ -1,16 +1,21 @@
+// app/api/orders/[id]/route.ts
 import prisma from "@/lib/prisma";
-import {NextRequest, NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-    const id = params.id;
+// GET /api/orders/:id
+export async function GET(
+    req: NextRequest,
+    context: { params: { id: string } }
+) {
+    const { id } = context.params;
 
     try {
         const order = await prisma.order.findUnique({
-            where: { id: id },
+            where: { id },
             include: {
                 items: {
                     include: {
-                        product: true,  // Include product details inside each item
+                        product: true,
                     },
                 },
             },
@@ -23,14 +28,20 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         return NextResponse.json(order);
     } catch (error) {
         console.error("Error fetching order:", error);
-        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+        return NextResponse.json(
+            { error: "Internal server error" },
+            { status: 500 }
+        );
     }
 }
 
+// PATCH /api/orders/:id
 export async function PATCH(
-    req: Request,
-    { params }: { params: { id: string } }
+    req: NextRequest,
+    context: { params: { id: string } }
 ) {
+    const { id } = context.params;
+
     try {
         const { status } = await req.json();
 
@@ -42,7 +53,7 @@ export async function PATCH(
         }
 
         const updatedOrder = await prisma.order.update({
-            where: { id: params.id },
+            where: { id },
             data: { status },
         });
 
