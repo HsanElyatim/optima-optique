@@ -66,7 +66,6 @@ const ProductCard: React.FC<{ product: ProductCardProps["product"] }> = ({ produ
                         <span className="text-lg font-bold text-gray-900">${price.toFixed(2)}</span>
                     )}
                 </div>
-
             </div>
 
             {/* Add to Cart */}
