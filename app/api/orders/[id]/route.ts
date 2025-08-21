@@ -1,10 +1,8 @@
-// app/api/orders/[id]/page.tsx
 import prisma from "@/lib/prisma";
-import { NextResponse, NextRequest } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-    const resolvedParams = await params;
-    const id = resolvedParams.id;
+    const id = params.id;
 
     try {
         const order = await prisma.order.findUnique({
