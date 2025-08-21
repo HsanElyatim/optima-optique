@@ -5,9 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 // GET /api/orders/:id
 export async function GET(
     req: NextRequest,
-    context: { params: { id: string } }
+    { params } : { params: Promise<{ id: string }> }
 ) {
-    const { id } = context.params;
+    const { id } = await params;
 
     try {
         const order = await prisma.order.findUnique({
@@ -38,9 +38,9 @@ export async function GET(
 // PATCH /api/orders/:id
 export async function PATCH(
     req: NextRequest,
-    context: { params: { id: string } }
+    { params } : { params: Promise<{ id: string }> }
 ) {
-    const { id } = context.params;
+    const { id } = await params;
 
     try {
         const { status } = await req.json();
