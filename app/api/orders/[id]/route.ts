@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 // GET /api/orders/:id
 export async function GET(
-    req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     const { id } = params;
