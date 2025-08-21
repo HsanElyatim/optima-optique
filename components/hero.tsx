@@ -1,85 +1,109 @@
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { ArrowRight, Play } from 'lucide-react'
-import { createClient } from "@/lib/supabase/server";
+"use client"
 
-export async function Hero() {
-    const supabase = await createClient();
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+import {useEffect, useRef, useState} from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ChevronDown } from "lucide-react";
+
+export function Hero() {
+    const ref = useRef<HTMLDivElement>(null);
+
+    const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const el = ref.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        el.style.setProperty("--x", `${x}%`);
+        el.style.setProperty("--y", `${y}%`);
+    };
+
+    const videos = ["/3326997-hd_1920_1080_24fps.mp4", "/4762443-hd_1920_1080_25fps.mp4", "/855574-hd_1920_1080_25fps.mp4"];
+    const [current, setCurrent] = useState(0);
+    const [next, setNext] = useState(1);
+    const videoRefs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
+    const [fade, setFade] = useState(0); // 0 = show current, 1 = show next
+
+    useEffect(() => {
+        const handleEnded = () => {
+            setFade(1); // start fade transition
+            setTimeout(() => {
+                // swap videos after fade
+                setCurrent(next);
+                setNext((next + 1) % videos.length);
+                setFade(0);
+            }, 1000); // match transition duration in CSS
+        };
+
+        const currentVideo = videoRefs[0].current;
+        if (currentVideo) {
+            currentVideo.addEventListener("ended", handleEnded);
+        }
+
+        return () => {
+            if (currentVideo) currentVideo.removeEventListener("ended", handleEnded);
+        };
+    }, [current, next]);
 
     return (
-        <section className="relative py-5 overflow-hidden">
-            <div className="container px-4 relative">
-                <div className="max-w-4xl mx-auto text-center">
-                    <div className="inline-flex items-center rounded-full border px-6 py-2 text-sm font-medium mb-8 bg-background/80 backdrop-blur">
-                        <span className="text-primary">●</span>
-                        <span className="ml-2">New Collection Available</span>
-                    </div>
+        <section aria-labelledby="hero-title" className="relative">
+            <div
+                ref={ref}
+                onMouseMove={handleMove}
+                className="relative overflow-hidden spotlight"
+            >
+                {/* Background video */}
+                <video
+                    ref={videoRefs[0]}
+                    src={videos[current]}
+                    autoPlay
+                    muted
+                    playsInline
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                        fade === 1 ? "opacity-0" : "opacity-100"
+                    }`}
+                />
+                {/* Next video (preload for smooth fade) */}
+                <video
+                    ref={videoRefs[1]}
+                    src={videos[next]}
+                    autoPlay
+                    muted
+                    playsInline
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                        fade === 1 ? "opacity-100" : "opacity-0"
+                    }`}
+                />
 
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-                        Premium{' '}
-                        <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                          Eyewear
-                        </span>{' '}
-                        Collection
+
+                {/* Soft gradient veil for readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-background/0" />
+
+                <div className="relative container mx-auto flex flex-col items-center text-center py-24 md:py-32">
+                    <Badge variant="secondary" className="mb-6">Solstice &#39;25 Collection</Badge>
+                    <h1 id="hero-title" className="font-display tracking-tight text-4xl md:text-6xl leading-tight max-w-4xl animate-enter">
+                        Luxury Eyewear, Crafted to Elevate
                     </h1>
-
-                    <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                        Discover our curated selection of stylish frames and sunglasses.
-                        Where quality craftsmanship meets modern design.
+                    <p className="mt-4 text-base md:text-lg max-w-2xl animate-fade-in">
+                        Premium sunglasses and optical frames with timeless silhouettes and modern materials.
                     </p>
-
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-                        {user ? (
-                            <>
-                                <Link href="/products">
-                                    <Button size="lg" className="px-8 py-3 text-lg group">
-                                        Browse Collection
-                                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                                    </Button>
-                                </Link>
-                                <Button variant="outline" size="lg" className="px-8 py-3 text-lg">
-                                    <Play className="mr-2 h-5 w-5" />
-                                    Watch Story
-                                </Button>
-                            </>
-                        ) : (
-                            <>
-                                <Link href="/auth/login">
-                                    <Button size="lg" className="px-8 py-3 text-lg group">
-                                        Sign In to Shop
-                                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                                    </Button>
-                                </Link>
-                                <Button variant="outline" size="lg" className="px-8 py-3 text-lg">
-                                    <Play className="mr-2 h-5 w-5" />
-                                    Learn More
-                                </Button>
-                            </>
-                        )}
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto">
-                        {[
-                            { value: '10K+', label: 'Happy Customers' },
-                            { value: '500+', label: 'Unique Frames' },
-                            { value: '50+', label: 'Brands' },
-                            { value: '24/7', label: 'Support' },
-                        ].map((stat, index) => (
-                            <div key={index} className="text-center">
-                                <div className="text-2xl md:text-3xl font-bold text-primary mb-1">
-                                    {stat.value}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                    {stat.label}
-                                </div>
-                            </div>
-                        ))}
+                    <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                        <Button variant="outline" size="lg" asChild>
+                            <a href="#sunglasses" aria-label="Shop sunglasses">Shop Sunglasses</a>
+                        </Button>
+                        <Button variant="outline" size="lg" asChild>
+                            <a href="#eyeglasses" aria-label="Shop eyeglasses">Shop Eyeglasses</a>
+                        </Button>
                     </div>
                 </div>
             </div>
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+                <ChevronDown
+                    className="w-8 h-8 text-primary animate-bounce"
+                    aria-hidden="true"
+                />
+                <span className="sr-only">Scroll down</span>
+            </div>
         </section>
-    )
+    );
 }

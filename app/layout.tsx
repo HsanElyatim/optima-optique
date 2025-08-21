@@ -4,12 +4,15 @@ import {ThemeProvider} from "next-themes";
 import "./globals.css";
 import {Navbar} from "@/components/Navabar";
 import TopAnnouncementBar from "@/components/top-announcement-bar";
+import {CartProvider, useCart} from "@/context/CartContext";
+import {Toaster} from "react-hot-toast";
+import Footer from "@/components/Footer";
 
 const defaultUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
 
 export const metadata: Metadata = {
     metadataBase: new URL(defaultUrl),
-    title: "Next.js and Supabase Starter Kit",
+    title: "Optima",
     description: "The fastest way to build apps with Next.js and Supabase",
 };
 
@@ -23,17 +26,21 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (<html lang="en" suppressHydrationWarning>
-        <body className={`${geistSans.className} antialiased`}>
-        <TopAnnouncementBar />
-        <Navbar/>
-        <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-        >
+    <body className={`${geistSans.className} antialiased`}>
+    <TopAnnouncementBar/>
+    <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+    >
+        <CartProvider>
+            <Navbar />
             {children}
-        </ThemeProvider>
-        </body>
-        </html>);
+            <Toaster position="top-right"/>
+        </CartProvider>
+    </ThemeProvider>
+    <Footer/>
+    </body>
+    </html>);
 }

@@ -102,7 +102,7 @@ export function FetchDataSteps() {
         </p>
         <CodeBlock
           code={
-            "npx shadcn@latest add https://supabase.com/ui/r/realtime-chat-nextjs.json"
+            "npx shadcn@latest create https://supabase.com/ui/r/realtime-chat-nextjs.json"
           }
         />
       </TutorialStep>

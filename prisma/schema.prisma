@@ -10,6 +10,87 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String // Supabase user UUID
+  items       OrderItem[]
+  totalAmount Float
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  fullName      String
+  email         String
+  phone         String
+  address       String
+  city          String
+  postalCode    String
+  country       String
+  paymentType   PaymentType
+  paymentStatus PaymentStatus
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  quantity  Int
+  price     Float // Price at time of order
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+enum PaymentType {
+  COD
+  CARD
+}
+
+enum PaymentStatus {
+  PAYED
+  PENDING
+  FAILED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  PENDING_OLINE_PAYMENT
+}
+
+model Product {
+  id           String      @id @default(uuid())
+  name         String
+  description  String
+  price        Float
+  offerPrice   Float? // optional discounted price
+  brand        String?
+  sku          String? // stock keeping unit
+  inStock      Boolean     @default(true)
+  stockQty     Int         @default(0)
+  images       String[] // array of image URLs
+  category     String // e.g., 'Sunglasses', 'Optical'
+  color        String?
+  gender       Gender // enum: Male, Female, Unisex
+  frameShape   String? // e.g., Round, Square
+  material     String? // e.g., Metal, Plastic
+  rating       Float       @default(0.0)
+  reviewsCount Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  OrderItem    OrderItem[]
+}
+
+enum Gender {
+  Male
+  Female
+  Unisex
+  Child
 }
