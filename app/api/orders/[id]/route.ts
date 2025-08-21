@@ -5,9 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 // GET /api/orders/:id
 export async function GET(
     req: NextRequest,
-    { params } : { params: Promise<{ id: string }> }
+    { params }: { params: { id: string } }
 ) {
-    const { id } = await params;
+    const { id } = params;
 
     try {
         const order = await prisma.order.findUnique({
@@ -27,7 +27,7 @@ export async function GET(
 
         return NextResponse.json(order);
     } catch (error) {
-        console.error("Error fetching order:", error);
+        console.error("Error fetching order");
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 }
@@ -38,9 +38,9 @@ export async function GET(
 // PATCH /api/orders/:id
 export async function PATCH(
     req: NextRequest,
-    { params } : { params: Promise<{ id: string }> }
+    { params }: { params: { id: string } }
 ) {
-    const { id } = await params;
+    const id = params.id;
 
     try {
         const { status } = await req.json();
